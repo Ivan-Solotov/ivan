@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Card Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .form-container {
+            width: 400px;
+            padding: 20px;
+        }
+        .card-preview {
+            width: 300px;
+            height: 180px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-left: 20px;
+            position: relative; 
+        }
+
+        .card-preview h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .card-preview p {
+            font-size: 1em;
+            margin: 5px 0;
+        }
+
+        .bank-logo, .payment-system-logo {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+        }
+
+        .bank-logo {
+            top: 10px;
+            left: 10px;
+            background-color: #eee; 
+            text-align: center;
+            line-height: 30px;
+        }
+
+        .payment-system-logo {
+            bottom: 10px;
+            right: 10px;
+            background-color: #eee; 
+            text-align: center;
+            line-height: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #673636;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2>Информация о Банковской Карте</h2>
+            <form id="cardForm">
+                <label for="bankName">имя банка:</label><br>
+                <input type="text" id="bankName" name="bankName"><br><br>
+
+                <label for="paymentSystem">Платежная система:</label><br>
+                <select id="paymentSystem" name="paymentSystem">
+                    <option value="">Select</option>
+                    <option value="Visa">Visa</option>
+                    <option value="Mastercard">Mastercard</option>
+                    <option value="Amex">American Express</option>
+                </select><br><br>
+
+                <label for="cardNumber">Номер карты (16 цифр):</label><br>
+                <input type="text" id="cardNumber" name="cardNumber" maxlength="16"><br><br>
+
+                <label for="cardHolder">Имя Владельца карты:</label><br>
+                <input type="text" id="cardHolder" name="cardHolder"><br><br>
+
+                <label for="expiryMonth">Месяц истечения срока действия:</label>
+                <select id="expiryMonth" name="expiryMonth">
+                    <option value="">Месяц</option>
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                </select>
+
+                <label for="expiryYear">год:</label>
+                <select id="expiryYear" name="expiryYear">
+                    <option value="">год</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select><br><br>
+
+                <button type="button" onclick="submitForm()">Отправить</button>
+            </form>
+        </div>
+
+        <div class="card-preview">
+            <h2><span id="previewBankName">Ваш банк</span></h2>
+            <p>номер карты: <span id="previewCardNumber">**** **** **** ****</span></p>
+            <p>Владелец карты: <span id="previewCardHolder">Владелец карты </span></p>
+            <p>срок действия: <span id="previewExpiry">MM/YY</span></p>
+        </div>
+    </div>
+
+    <h2>Таблица данных карты</h2>
+    <table id="cardTable">
+        <thead>
+            <tr>
+                <th>название банка</th>
+                <th>Платежная система</th>
+                <th>Номер карты</th>
+                <th>имя владельца</th>
+                <th>срок действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const bankNameInput = document.getElementById("bankName");
+        const paymentSystemSelect = document.getElementById("paymentSystem");
+        const cardNumberInput = document.getElementById("cardNumber");
+        const cardHolderInput = document.getElementById("cardHolder");
+        const expiryMonthSelect = document.getElementById("expiryMonth");
+        const expiryYearSelect = document.getElementById("expiryYear");
+
+        const previewBankName = document.getElementById("previewBankName");
+        const previewCardNumber = document.getElementById("previewCardNumber");
+        const previewCardHolder = document.getElementById("previewCardHolder");
+        const previewExpiry = document.getElementById("previewExpiry");
+
+        const bankLogoDiv = document.getElementById("bankLogo");
+        const paymentSystemLogoDiv = document.getElementById("paymentSystemLogo");
+
+        const cardTableBody = document.getElementById("cardTable").getElementsByTagName("tbody")[0];
+
+
+        bankNameInput.addEventListener("input", updatePreview);
+        paymentSystemSelect.addEventListener("change", updatePreview);
+        cardNumberInput.addEventListener("input", updatePreview);
+        cardHolderInput.addEventListener("input", updatePreview);
+        expiryMonthSelect.addEventListener("change", updatePreview);
+        expiryYearSelect.addEventListener("change", updatePreview);
+
+
+        function updatePreview() {
+            previewBankName.textContent = bankNameInput.value || "Bank Name";
+
+            let formattedCardNumber = cardNumberInput.value;
+            if (formattedCardNumber.length > 0) {
+                formattedCardNumber = formattedCardNumber.replace(/\D/g, ''); 
+                formattedCardNumber = formattedCardNumber.replace(/(\d{4})/g, '$1 ').trim(); 
+                previewCardNumber.textContent = formattedCardNumber;
+            } else {
+                previewCardNumber.textContent = "**** **** **** ****";
+            }
+
+            previewCardHolder.textContent = cardHolderInput.value || "Card Holder";
+
+            const expiryMonth = expiryMonthSelect.value;
+            const expiryYear = expiryYearSelect.value;
+            previewExpiry.textContent = (expiryMonth && expiryYear) ? `${expiryMonth}/${expiryYear.slice(-2)}` : "MM/YY";
+
+            const paymentSystem = paymentSystemSelect.value;
+            if(paymentSystem === "Visa"){
+                paymentSystemLogoDiv.textContent = "Visa Logo"; 
+            } else if (paymentSystem === "Mastercard") {
+                paymentSystemLogoDiv.textContent = "Mastercard Logo"; 
+            } else if (paymentSystem === "Amex") {
+                paymentSystemLogoDiv.textContent = "American Express Logo"; 
+            } else {
+                paymentSystemLogoDiv.textContent = "Payment System Logo"; 
+            }
+
+
+            bankLogoDiv.textContent = bankNameInput.value ? `${bankNameInput.value} Logo` : "Bank Logo";  
+
+        }
+
+
+        function submitForm() {
+            const bankName = bankNameInput.value;
+            const paymentSystem = paymentSystemSelect.value;
+            const cardNumber = cardNumberInput.value;
+            const cardHolder = cardHolderInput.value;
+            const expiryMonth = expiryMonthSelect.value;
+            const expiryYear = expiryYearSelect.value;
+            const expiry = `${expiryMonth}/${expiryYear.slice(-2)}`;
+
+            let newRow = cardTableBody.insertRow();
+            let cell1 = newRow.insertCell(0);
+            let cell2 = newRow.insertCell(1);
+            let cell3 = newRow.insertCell(2);
+            let cell4 = newRow.insertCell(3);
+            let cell5 = newRow.insertCell(4);
+
+            cell1.textContent = bankName;
+            cell2.textContent = paymentSystem;
+            cell3.textContent = cardNumber;
+            cell4.textContent = cardHolder;
+            cell5.textContent = expiry;
+
+            document.getElementById("cardForm").reset();
+            updatePreview(); 
+        }
+    </script>
+</body>
+</html>
